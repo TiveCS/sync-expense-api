@@ -1,9 +1,9 @@
 import { ErrorHandler } from "hono";
+import { HTTPException } from "hono/http-exception";
 import httpStatus from "http-status";
-import { AppException } from "./common";
 
 export const errorFilters: ErrorHandler = (err, c) => {
-  if (err instanceof AppException) {
+  if (err instanceof HTTPException) {
     return err.getResponse();
   }
 

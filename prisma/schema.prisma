@@ -48,13 +48,13 @@ enum TransactionCategory {
 }
 
 model Transaction {
-  id        String              @id @default(cuid())
-  amount    Decimal
-  isExpense Boolean
-  category  TransactionCategory
-  accountId String
-  account   Account             @relation(fields: [accountId], references: [id])
-  occurred  DateTime
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
+  id         String              @id @default(cuid())
+  amount     Decimal
+  isExpense  Boolean
+  category   TransactionCategory
+  accountId  String
+  account    Account             @relation(fields: [accountId], references: [id])
+  occurredAt DateTime
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
 }

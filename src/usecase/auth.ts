@@ -2,13 +2,12 @@ import { AuthExceptions } from "@/exceptions/auth";
 import { AppException } from "@/exceptions/common";
 import { createTokenExpireTime } from "@/helpers/jwt";
 import { prisma } from "@/lib/prisma";
+import { AuthSignInDTO, AuthSignUpDTO } from "@/schemas/auth";
 import {
-  AuthSignInDTO,
+  AuthJwtPayload,
   AuthSignInResponse,
-  AuthSignUpDTO,
   AuthSignUpResponse,
-} from "@/schemas/auth";
-import { AuthJwtPayload } from "@/types/auth";
+} from "@/types/auth";
 import { hash, verify } from "argon2";
 import * as jwt from "hono/jwt";
 
