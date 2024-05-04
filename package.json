@@ -1,11 +1,12 @@
 {
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "start": "bun run src/index.ts",
+    "dev": "bun run --hot src/index.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.2.1",
     "@prisma/client": "^5.13.0",
-    "@t3-oss/env-core": "^0.10.1",
     "argon2": "^0.40.1",
     "hono": "^4.2.9",
     "http-status": "^1.7.4",
