@@ -82,7 +82,9 @@ export async function getAccountDetailsUsecase(
 ): Promise<GetAccountDetailsResponse> {
   const account = await prisma.account.findUnique({
     where: { id: accountId },
-    include: { transactions: true },
+    include: {
+      _count: { select: { transactions: true } },
+    },
   });
 
   if (!account) {
@@ -92,12 +94,6 @@ export async function getAccountDetailsUsecase(
   return {
     id: account.id,
     name: account.name,
-    transactions: account.transactions.map((transaction) => ({
-      id: transaction.id,
-      amount: transaction.amount.toNumber(),
-      isExpense: transaction.isExpense,
-      category: transaction.category,
-      occurredAt: transaction.occurredAt,
-    })),
+    _count: { transactions: account._count.transactions },
   };
 }

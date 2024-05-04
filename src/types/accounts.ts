@@ -8,14 +8,6 @@ export type UpdateAccountResponse = {
   id: string;
 };
 
-export type AccountTransaction = {
-  id: string;
-  amount: number;
-  isExpense: boolean;
-  category: TransactionCategory;
-  occurredAt: Date;
-};
-
 export type AccountOverview = {
   id: string;
   name: string;
@@ -25,7 +17,9 @@ export type AccountOverview = {
 export type AccountDetails = {
   id: string;
   name: string;
-  transactions: AccountTransaction[];
+  _count: {
+    transactions: number;
+  };
 };
 
 export type GetAccountsResponse = AccountOverview[];
