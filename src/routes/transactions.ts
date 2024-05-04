@@ -1,4 +1,5 @@
 import { jwtAccessMiddleware } from "@/middlewares/jwt";
+import { PaginationSchema } from "@/schemas/common";
 import {
   CreateTransactionSchema,
   UpdateTransactionSchema,
@@ -30,19 +31,23 @@ transactionsRoutes.post(
   }
 );
 
-transactionsRoutes.get("/", async (c) => {
-  const accountId = c.req.param("accountId");
+transactionsRoutes.get(
+  "/",
+  zValidator("query", PaginationSchema),
+  async (c) => {
+    const accountId = c.req.param("accountId");
+    const pagination = c.req.valid("query");
 
-  const result = await getAccountTransactionsUsecase(accountId);
+    const result = await getAccountTransactionsUsecase(accountId, pagination);
 
-  return c.json(result, { status: httpStatus.OK });
-});
+    return c.json(result, { status: httpStatus.OK });
+  }
+);
 
 transactionsRoutes.put(
   "/:id",
   zValidator("json", UpdateTransactionSchema),
   async (c) => {
-    const accountId = c.req.param("accountId");
     const transactionId = c.req.param("id");
     const dto = c.req.valid("json");
 
