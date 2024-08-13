@@ -10,10 +10,22 @@ type TransactionRepository interface {
 	FindByID(id string) (*entities.Transaction, error)
 	FindByAccountID(accountID string) ([]entities.Transaction, error)
 	DeleteById(id string) error
+	UpdateById(id string, transaction *entities.Transaction) error
 }
 
 type transactionRepository struct {
 	db *gorm.DB
+}
+
+// UpdateById implements TransactionRepository.
+func (t *transactionRepository) UpdateById(id string, transaction *entities.Transaction) error {
+	result := t.db.Model(&entities.Transaction{}).Where("id = ?", id).Updates(transaction)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
 
 // Create implements TransactionRepository.

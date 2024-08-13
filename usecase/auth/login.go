@@ -1,16 +1,19 @@
 package usecase
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/TiveCS/sync-expense/api/entities"
+	"github.com/TiveCS/sync-expense/api/exceptions"
 	"github.com/TiveCS/sync-expense/api/repositories"
 	"github.com/labstack/echo/v4"
 	"github.com/matthewhartstonge/argon2"
+	"gorm.io/gorm"
 )
 
 type AuthLoginUsecase interface {
-	Execute(loginUser *entities.LoginUser) (string, string, error)
+	Execute(loginUser *entities.LoginUserDTO) (string, string, error)
 }
 
 type authLoginUsecase struct {
@@ -19,15 +22,14 @@ type authLoginUsecase struct {
 }
 
 // Execute implements AuthLoginUsecase.
-func (u *authLoginUsecase) Execute(loginUser *entities.LoginUser) (string, string, error) {
+func (u *authLoginUsecase) Execute(loginUser *entities.LoginUserDTO) (string, string, error) {
 	user, err := u.userRepo.FindByEmail(loginUser.Email)
 	if err != nil {
-		return "", "", err
-	}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", "", echo.NewHTTPError(http.StatusUnauthorized, exceptions.AuthInvalidCredentials)
+		}
 
-	if user == nil {
-		echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
-		return "", "", nil
+		return "", "", err
 	}
 
 	matches, err := argon2.VerifyEncoded([]byte(loginUser.Password), []byte(user.Password))
@@ -37,8 +39,7 @@ func (u *authLoginUsecase) Execute(loginUser *entities.LoginUser) (string, strin
 	}
 
 	if !matches {
-		echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
-		return "", "", nil
+		return "", "", echo.NewHTTPError(http.StatusUnauthorized, exceptions.AuthInvalidCredentials)
 	}
 
 	accessToken, refreshToken, err := u.generateTokenUsecase.Execute(user)

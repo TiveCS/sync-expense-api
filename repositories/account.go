@@ -9,10 +9,34 @@ type AccountRepository interface {
 	Create(account *entities.Account) error
 	FindByID(id string) (*entities.Account, error)
 	FindByOwnerID(ownerID string) (*entities.Account, error)
+	UpdateByID(id string, account *entities.Account) error
+	DeleteByID(id string) error
 }
 
 type accountRepository struct {
 	db *gorm.DB
+}
+
+// DeleteByID implements AccountRepository.
+func (r *accountRepository) DeleteByID(id string) error {
+	result := r.db.Where("id = ?", id).Delete(&entities.Account{})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+// UpdateByID implements AccountRepository.
+func (r *accountRepository) UpdateByID(id string, account *entities.Account) error {
+	result := r.db.Model(&entities.Account{}).Where("id = ?", id).Updates(account)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
 
 // Create implements AccountRepository.

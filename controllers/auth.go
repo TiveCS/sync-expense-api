@@ -5,7 +5,8 @@ import (
 
 	"github.com/TiveCS/sync-expense/api/entities"
 	"github.com/TiveCS/sync-expense/api/repositories"
-	usecase "github.com/TiveCS/sync-expense/api/usecase/auth"
+	accountsUsecase "github.com/TiveCS/sync-expense/api/usecase/accounts"
+	authUsecase "github.com/TiveCS/sync-expense/api/usecase/auth"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
@@ -18,10 +19,10 @@ type AuthController interface {
 
 type authController struct {
 	userRepo             repositories.UserRepository
-	registerUsecase      usecase.AuthRegisterUsecase
-	loginUsecase         usecase.AuthLoginUsecase
-	meUsecase            usecase.AuthMeUsecase
-	generateTokenUsecase usecase.AuthGenerateTokenUsecase
+	registerUsecase      authUsecase.AuthRegisterUsecase
+	loginUsecase         authUsecase.AuthLoginUsecase
+	meUsecase            authUsecase.AuthMeUsecase
+	generateTokenUsecase authUsecase.AuthGenerateTokenUsecase
 }
 
 // Me implements AuthController.
@@ -40,7 +41,7 @@ func (c *authController) Me(ctx echo.Context) error {
 
 // Register implements AuthController.
 func (c *authController) Register(ctx echo.Context) error {
-	newUser := ctx.Get("payload").(*entities.NewUser)
+	newUser := ctx.Get("payload").(*entities.NewUserDTO)
 
 	result, err := c.registerUsecase.Execute(newUser)
 
@@ -53,7 +54,7 @@ func (c *authController) Register(ctx echo.Context) error {
 
 // Login implements AuthController.
 func (c *authController) Login(ctx echo.Context) error {
-	loginUser := ctx.Get("payload").(*entities.LoginUser)
+	loginUser := ctx.Get("payload").(*entities.LoginUserDTO)
 
 	accessToken, refreshToken, err := c.loginUsecase.Execute(loginUser)
 
@@ -67,14 +68,14 @@ func (c *authController) Login(ctx echo.Context) error {
 	})
 }
 
-func NewAuthController(userRepo repositories.UserRepository) AuthController {
-	genTokenUsecase := usecase.NewAuthGenerateTokenUsecase()
+func NewAuthController(ur repositories.UserRepository, ar repositories.AccountRepository) AuthController {
+	gtu := authUsecase.NewAuthGenerateTokenUsecase()
 
 	return &authController{
-		userRepo:             userRepo,
-		registerUsecase:      usecase.NewAuthRegisterUsecase(userRepo),
-		loginUsecase:         usecase.NewAuthLoginUsecase(userRepo, genTokenUsecase),
-		meUsecase:            usecase.NewAuthMeUsecase(userRepo),
-		generateTokenUsecase: genTokenUsecase,
+		userRepo:             ur,
+		registerUsecase:      authUsecase.NewAuthRegisterUsecase(ur, accountsUsecase.NewAccountCreateUsecase(ar)),
+		loginUsecase:         authUsecase.NewAuthLoginUsecase(ur, gtu),
+		meUsecase:            authUsecase.NewAuthMeUsecase(ur),
+		generateTokenUsecase: gtu,
 	}
 }
