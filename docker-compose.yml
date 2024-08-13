@@ -1,0 +1,10 @@
+services:
+  dev-db:
+    container_name: dev-db
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: superpassword
+      POSTGRES_DB: dev
