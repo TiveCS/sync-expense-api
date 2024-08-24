@@ -16,7 +16,6 @@ type AccountController interface {
 }
 
 type accountsController struct {
-	accountsRepository     repositories.AccountRepository
 	accountGetOwnedUsecase usecase.AccountGetOwnedUsecase
 	accountEditUsecase     usecase.AccountEditUsecase
 }
@@ -54,7 +53,6 @@ func (c *accountsController) EditAccountByID(ctx echo.Context) error {
 
 func NewAccountController(ar repositories.AccountRepository) AccountController {
 	return &accountsController{
-		accountsRepository:     ar,
 		accountGetOwnedUsecase: usecase.NewAccountGetOwnedUsecase(ar),
 		accountEditUsecase:     usecase.NewAccountEditUsecase(ar),
 	}

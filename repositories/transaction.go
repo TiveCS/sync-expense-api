@@ -3,12 +3,13 @@ package repositories
 import (
 	"github.com/TiveCS/sync-expense/api/entities"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type TransactionRepository interface {
-	Create(transaction *entities.Transaction) error
+	Create(transaction *entities.Transaction) (string, error)
 	FindByID(id string) (*entities.Transaction, error)
-	FindByAccountID(accountID string) ([]entities.Transaction, error)
+	FindByAccountID(dto *entities.GetTransactionsDTO) ([]entities.Transaction, error)
 	DeleteById(id string) error
 	UpdateById(id string, transaction *entities.Transaction) error
 }
@@ -29,14 +30,14 @@ func (t *transactionRepository) UpdateById(id string, transaction *entities.Tran
 }
 
 // Create implements TransactionRepository.
-func (t *transactionRepository) Create(transaction *entities.Transaction) error {
+func (t *transactionRepository) Create(transaction *entities.Transaction) (string, error) {
 	result := t.db.Create(transaction)
 
 	if result.Error != nil {
-		return result.Error
+		return "", result.Error
 	}
 
-	return nil
+	return transaction.ID, nil
 }
 
 // DeleteById implements TransactionRepository.
@@ -51,10 +52,27 @@ func (t *transactionRepository) DeleteById(id string) error {
 }
 
 // FindByAccountID implements TransactionRepository.
-func (t *transactionRepository) FindByAccountID(accountID string) ([]entities.Transaction, error) {
+func (t *transactionRepository) FindByAccountID(dto *entities.GetTransactionsDTO) ([]entities.Transaction, error) {
 	var transactions []entities.Transaction
 
-	result := t.db.Where("account_id = ?", accountID).Find(&transactions)
+	var limit int = -1
+	if dto.Limit != 0 {
+		limit = int(dto.Limit)
+	}
+
+	var sortDir string = "desc"
+	if dto.SortDir != "" {
+		sortDir = dto.SortDir
+	}
+
+	var sortBy string = "occurred_at"
+	if dto.SortBy != "" {
+		sortBy = dto.SortBy
+	}
+
+	result := t.db.Where("account_id = ?", dto.AccountID).Order(clause.OrderByColumn{
+		Column: clause.Column{Name: sortBy}, Desc: sortDir == "desc",
+	}).Limit(limit).Find(&transactions)
 
 	if result.Error != nil {
 		return nil, result.Error

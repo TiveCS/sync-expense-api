@@ -32,9 +32,11 @@ func main() {
 
 	userRepo := repositories.NewUserRepository(db)
 	accountRepo := repositories.NewAccountRepository(db)
+	transactionRepo := repositories.NewTransactionRepository(db)
 
 	authController := controllers.NewAuthController(userRepo, accountRepo)
 	accountsController := controllers.NewAccountController(accountRepo)
+	transactionsController := controllers.NewTransactionController(transactionRepo)
 
 	v1 := e.Group("/api/v1")
 
@@ -46,6 +48,13 @@ func main() {
 	accounts := v1.Group("/accounts", middlewares.Authenticated())
 	accounts.GET("", accountsController.GetOwnerAccount, middlewares.Validate(&entities.GetManyAccountsDTO{}))
 	accounts.PUT("/:account_id", accountsController.EditAccountByID, middlewares.Validate(&entities.EditAccountDTO{}))
+
+	transactions := v1.Group("/transactions", middlewares.Authenticated())
+	transactions.POST("", transactionsController.NewTransaction, middlewares.Validate(&entities.NewTransactionDTO{}))
+	transactions.GET("", transactionsController.GetTransactionsByOwnerID, middlewares.Validate(&entities.GetTransactionsDTO{}))
+	transactions.GET("/:transaction_id", transactionsController.GetTransactionDetailsByID)
+	transactions.DELETE("/:transaction_id", transactionsController.DeleteTransactionByID)
+	transactions.PUT("/:transaction_id", transactionsController.EditTransactionByID, middlewares.Validate(&entities.EditTransactionDTO{}))
 
 	e.Logger.Fatal(e.Start(":1323"))
 }

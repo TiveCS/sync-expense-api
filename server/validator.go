@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"github.com/TiveCS/sync-expense/api/enums"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -24,7 +25,11 @@ func (v *appValidator) Validate(i interface{}) error {
 }
 
 func NewAppValidator() AppValidator {
+	v := validator.New()
+
+	v.RegisterValidation("transaction_category", enums.ValidateTransactionCategory)
+
 	return &appValidator{
-		validator: validator.New(),
+		validator: v,
 	}
 }

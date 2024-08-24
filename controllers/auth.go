@@ -18,7 +18,6 @@ type AuthController interface {
 }
 
 type authController struct {
-	userRepo             repositories.UserRepository
 	registerUsecase      authUsecase.AuthRegisterUsecase
 	loginUsecase         authUsecase.AuthLoginUsecase
 	meUsecase            authUsecase.AuthMeUsecase
@@ -63,8 +62,8 @@ func (c *authController) Login(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]string{
-		"accessToken":  accessToken,
-		"refreshToken": refreshToken,
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
 	})
 }
 
@@ -72,7 +71,6 @@ func NewAuthController(ur repositories.UserRepository, ar repositories.AccountRe
 	gtu := authUsecase.NewAuthGenerateTokenUsecase()
 
 	return &authController{
-		userRepo:             ur,
 		registerUsecase:      authUsecase.NewAuthRegisterUsecase(ur, accountsUsecase.NewAccountCreateUsecase(ar)),
 		loginUsecase:         authUsecase.NewAuthLoginUsecase(ur, gtu),
 		meUsecase:            authUsecase.NewAuthMeUsecase(ur),

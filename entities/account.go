@@ -10,7 +10,7 @@ type Account struct {
 	ID           string         `json:"id" gorm:"primary_key"`
 	Name         string         `json:"name" gorm:"not null"`
 	OwnerID      string         `json:"owner_id" gorm:"index;not null;unique"`
-	Owner        User           `json:"owner" gorm:"foreignKey:OwnerID"`
+	Owner        *User          `json:"owner" gorm:"foreignKey:OwnerID"`
 	Transactions []Transaction  `json:"transactions"`
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
